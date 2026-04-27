@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日穿搭决策器 | 随机搭配助手</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            /* 避免拖动/选中文本，提升点击体验，非必须 */
+        }
+
+        body {
+            background: linear-gradient(145deg, #f5f0e7 0%, #e8e0d5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 主卡片 */
+        .card {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(2px);
+            border-radius: 56px;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.05);
+            padding: 24px 20px 36px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, #2c3e4e, #1b2f3a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .sub {
+            color: #6c5e4f;
+            border-bottom: 1px solid #e2d9cf;
+            display: inline-block;
+            padding-bottom: 6px;
+            margin-bottom: 20px;
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+
+        /* 穿搭展示区 */
+        .outfit-showcase {
+            background: #fefaf5;
+            border-radius: 48px;
+            padding: 28px 16px;
+            margin: 20px 0;
+            box-shadow: inset 0 1px 4px #0001, 0 8px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #fff8;
+        }
+
+        .outfit-icon {
+            font-size: 3.8rem;
+            letter-spacing: 12px;
+            margin-bottom: 12px;
+            opacity: 0.8;
+        }
+
+        .outfit-detail {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #2c3e2f;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .detail-note {
+            font-size: 0.9rem;
+            color: #a57c5c;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        /* 随机按钮 */
+        .randomize-btn {
+            background: #2c3e4e;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 14px 28px;
+            border-radius: 60px;
+            width: 80%;
+            cursor: pointer;
+            box-shadow: 0 8px 16px -8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.15s, background 0.2s;
+            margin: 8px 0 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .randomize-btn:active {
+            transform: scale(0.96);
+            background: #1f2e3a;
+        }
+
+        /* 场景选择器 */
+        .scene-section {
+            background: #ece4da60;
+            border-radius: 48px;
+            padding: 12px 12px;
+            margin-top: 10px;
+        }
+
+        .scene-title {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #8b765c;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .scene-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .scene-btn {
+            background: #ede3d7;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #4a3a2a;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .scene-btn.active {
+            background: #b98f6e;
+            color: white;
+            box-shadow: 0 2px 6px #b98f6e80;
+        }
+
+        .reset-scene {
+            background: none;
+            border: 1px dashed #cbbca8;
+            color: #7f6952;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            color: #b9aa99;
+            margin-top: 28px;
+            border-top: 1px solid #efe2d4;
+            padding-top:18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h1>🧥 今日穿搭决策器</h1>
+        <div class="sub">✨ 专治选择困难 · 一键生成灵感 ✨</div>
+
+        <!-- 穿搭展示区 -->
+        <div class="outfit-showcase">
+            <div class="outfit-icon">👔 👖 👟</div>
+            <div class="outfit-detail" id="outfitText">雾蓝衬衫 + 卡其休闲裤 + 小白鞋</div>
+            <div class="detail-note" id="outfitNote">🍃 清爽简约，适合日常通勤/约会</div>
+        </div>
+
+        <!-- 随机按钮 核心交互 -->
+        <button class="randomize-btn" id="randomBtn">🎲 换一套搭配 🎲</button>
+
+        <!--场景辅助模块-->
+        <div class="scene-section">
+            <div class="scene-title">根据场景挑选搭配</div>
+            <div class="scene-btn" id="sceneContainer">
+                <button class="scene-btn" data-scene="daily">日常通勤</button>
+                <button class="scene-btn" data-scene="interview">面试/职场</button>
+                <button class="scene-btn" data-scene="data">约会/聚会</button>
+                <button class="scene-btn reset-scene" data-scene="all">全部风格</button>
+            </div>
+        </div>
+        <footer>点击按钮随机生成|支持场景筛选</footer>
+    </div>
+
+    <script>
+        //穿搭数据库（包含类别+场合+描述）
+        //为了让功能丰满但代码清晰，我们定义搭配库
+        const outfitsLibrary = [
+            {id:0,top:"纯棉白T",bottom:"水洗蓝牛仔裤 "}
+        ]
+    </script>
+</body>
+</html>
