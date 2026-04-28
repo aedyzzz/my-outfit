@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>我的衣橱 · 授权登录</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #f6f2ef 0%, #e8dfd9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1000" opacity="0.05"><path fill="none" stroke="%23907764" stroke-width="1.2" d="M130 120 L180 180 L120 210 L70 150 Z M450 280 L520 330 L470 400 L400 350 Z M320 550 L400 590 L350 670 L270 630 Z M530 810 L590 850 L540 920 L480 880 Z M80 700 L140 760 L90 820 L30 760 Z"/><circle cx="520" cy="130" r="18" stroke="%23907764" fill="none" stroke-width="1"/><circle cx="100" cy="450" r="15" stroke="%23907764" fill="none"/></svg>');
+      background-repeat: repeat;
+      background-size: 150px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .auth-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(2px);
+      border-radius: 40px;
+      box-shadow: 0 20px 38px -12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.02);
+      overflow: hidden;
+      transition: transform 0.25s ease;
+      width: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .brand-header {
+      background: #2b241f;
+      padding: 1.8rem 2rem 1.4rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .brand-header::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 25%;
+      width: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, #c7aa8b, #e3cfbc, #c7aa8b);
+      border-radius: 2px;
+    }
+
+    .logo-icon {
+      font-size: 2.6rem;
+      color: #e9d7ca;
+      margin-bottom: 0.4rem;
+    }
+
+    .brand-header h1 {
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 1.85rem;
+    }
+
+    .brand-header p {
+      color: #d1bfae;
+      font-size: 0.8rem;
+      margin-top: 0.4rem;
+    }
+
+    .form-wrapper {
+      padding: 2rem 2rem 2rem 2rem;
+    }
+
+    .welcome-text {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #2b241f;
+      margin-bottom: 0.3rem;
+    }
+
+    .sub-text {
+      font-size: 0.85rem;
+      color: #7e6858;
+      margin-bottom: 1.8rem;
+      border-left: 3px solid #c7aa8b;
+      padding-left: 12px;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .input-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #3f2e24;
+      margin-bottom: 8px;
+    }
+
+    .input-label i {
+      color: #b68b64;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1rem;
+      background: #fffefc;
+      border: 1.5px solid #ede2da;
+      border-radius: 32px;
+      transition: all 0.2s ease;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .input-field:focus {
+      border-color: #c7aa8b;
+      box-shadow: 0 0 0 3px rgba(199, 170, 139, 0.2);
+    }
+
+    /* 密码框容器，用于放置眼睛图标 */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-wrapper .input-field {
+      padding-right: 48px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #b68b64;
+      font-size: 1.1rem;
+      transition: color 0.2s;
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .toggle-password:hover {
+      color: #8b6242;
+    }
+
+    .options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0.8rem 0 1.8rem 0;
+      font-size: 0.8rem;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: #5e4a3b;
+    }
+
+    .forgot-link {
+      color: #b68b64;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-btn,
+    .register-btn {
+      width: 100%;
+      background: #2b241f;
+      border: none;
+      padding: 14px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-bottom: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .login-btn:hover,
+    .register-btn:hover {
+      background: #3f3027;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #cbb9a9;
+      font-size: 0.75rem;
+      margin: 0.2rem 0 1.2rem 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #ede0d7;
+    }
+
+    .divider span {
+      margin: 0 12px;
+    }
+
+    .social-login {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .social-icon {
+      width: 52px;
+      height: 52px;
+      background: #faf7f4;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #604c3c;
+      font-size: 1.6rem;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: 1px solid #e8dbd2;
+    }
+
+    .social-icon:hover {
+      background: #efe3da;
+      transform: translateY(-3px);
+      border-color: #c7aa8b;
+    }
+
+    .signup-prompt,
+    .login-prompt {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6e5b4c;
+      margin-top: 0.2rem;
+    }
+
+    .signup-link,
+    .login-link {
+      color: #b68b64;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .free-badge {
+      text-align: center;
+      font-size: 0.7rem;
+      margin-top: 1rem;
+      color: #b5a08e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* 授权弹窗 Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0.2s, opacity 0.2s;
+    }
+
+    .modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .auth-modal {
+      background: #ffffff;
+      width: 86%;
+      max-width: 320px;
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 30px 40px rgba(0, 0, 0, 0.2);
+      animation: modalFadeIn 0.2s ease;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        transform: scale(0.96);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: #2b241f;
+      padding: 1.2rem;
+      text-align: center;
+      color: white;
+    }
+
+    .modal-header i {
+      font-size: 2.4rem;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .modal-header h3 {
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+
+    .modal-body {
+      padding: 1.5rem 1.2rem;
+      text-align: center;
+    }
+
+    .modal-body p {
+      color: #4a3a30;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+    }
+
+    .permission-list {
+      background: #f8f4f0;
+      border-radius: 28px;
+      padding: 12px 16px;
+      margin: 1rem 0;
+      text-align: left;
+      font-size: 0.8rem;
+      color: #2b241f;
+    }
+
+    .permission-list i {
+      color: #6b8c5c;
+      width: 24px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn-deny,
+    .btn-allow {
+      flex: 1;
+      padding: 12px 0;
+      border-radius: 60px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .btn-deny {
+      background: #ede3db;
+      color: #7c6758;
+    }
+
+    .btn-allow {
+      background: #2b241f;
+      color: white;
+    }
+
+    .btn-allow:hover {
+      background: #4f3b2e;
+    }
+
+    /* 加载糊层 */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 4000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0.2s, opacity 0.2s;
+    }
+
+    .loading-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .loading-spinner {
+      background: #2b241f;
+      padding: 1.2rem 2rem;
+      border-radius: 60px;
+      color: #f0e4db;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-weight: 500;
+    }
+
+    .fa-spinner {
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .toast-msg {
+      visibility: hidden;
+      min-width: 200px;
+      background: #2b241f;
+      color: #f0e4db;
+      text-align: center;
+      border-radius: 50px;
+      padding: 10px 16px;
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      z-index: 3500;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast-msg.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    @media (max-width: 500px) {
+      .form-wrapper {
+        padding: 1.6rem;
+      }
+
+      .brand-header {
+        padding: 1.3rem 1.2rem;
+      }
+
+      .brand-header h1 {
+        font-size: 1.6rem;
+      }
+    }
+
+    .page-hidden {
+      display: none;
+    }
+
+    .page-visible {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="auth-container">
+    <!-- 登录卡片 -->
+    <div id="loginPage" class="card page page-visible">
+      <div class="brand-header">
+        <div class="logo-icon"><i class="fas fa-wardrobe"></i> <i class="fas fa-hanger"></i></div>
+        <h1>我的衣橱</h1>
+        <p>FREE & ELEGANT · 免费衣橱空间</p>
+        <div class="decor-dot"></div>
+      </div>
+      <div class="form-wrapper">
+        <div class="welcome-text">欢迎回来</div>
+        <div class="sub-text">登录即可管理你的每日穿搭</div>
+        <form id="loginForm">
+          <div class="input-group">
+            <div class="input-label"><i class="fas fa-envelope"></i><span>电子邮箱 / 手机号</span></div>
+            <input type="text" id="loginEmail" class="input-field" placeholder="your@wardrobe.com 或 手机号"
+              autocomplete="username">
+          </div>
+          <div class="input-group">
+            <div class="input-label"><i class="fas fa-lock"></i><span>密码</span></div>
+            <div class="password-wrapper">
+              <input type="password" id="loginPassword" class="input-field" placeholder="请输入密码"
+                autocomplete="current-password">
+              <button type="button" class="toggle-password" data-target="loginPassword" aria-label="显示/隐藏密码">
+                <i class="far fa-eye-slash"></i>
+              </button>
+            </div>
+          </div>
+          <div class="options">
+            <label class="checkbox"><input type="checkbox" id="rememberCheck"> <span>记住登录状态</span></label>
+            <a href="#" class="forgot-link" id="forgotPwdLink">忘记密码?</a>
+          </div>
+          <button type="submit" class="login-btn" id="loginButton"><span>登 录</span> <i
+              class="fas fa-arrow-right"></i></button>
+        </form>
+        <div class="divider"><span>社交账号快捷登录</span></div>
+        <div class="social-login">
+          <div class="social-icon" id="wechatLoginBtn"><i class="fab fa-weixin"></i></div>
+          <div class="social-icon" id="qqLoginBtn"><i class="fab fa-qq"></i></div>
+        </div>
+        <div class="signup-prompt">还没有衣橱账号？<a class="signup-link" id="gotoRegisterBtn">立即注册</a><span
+            style="margin-left:6px;">🎀 免费使用</span></div>
+        <div class="free-badge"><i class="fas fa-check-circle"></i> 完全免费 · 无会员限制</div>
+      </div>
+    </div>
+
+    <!-- 注册卡片 -->
+    <div id="registerPage" class="card page page-hidden">
+      <div class="brand-header">
+        <div class="logo-icon"><i class="fas fa-wardrobe"></i> <i class="fas fa-user-plus"></i></div>
+        <h1>创建衣橱账号</h1>
+        <p>免费注册 · 开启专属风尚</p>
+      </div>
+      <div class="form-wrapper">
+        <div class="welcome-text">加入衣橱</div>
+        <div class="sub-text">填写信息，免费拥有个人数字衣橱</div>
+        <form id="registerForm">
+          <div class="input-group">
+            <div class="input-label"><i class="fas fa-user"></i><span>用户名</span></div><input type="text"
+              id="regUsername" class="input-field" placeholder="昵称/时尚代号">
+          </div>
+          <div class="input-group">
+            <div class="input-label"><i class="fas fa-envelope"></i><span>电子邮箱/手机号</span></div><input type="text"
+              id="regEmail" class="input-field" placeholder="your@wardrobe.com 或 手机号">
+          </div>
+          <div class="input-group">
+            <div class="input-label"><i class="fas fa-lock"></i><span>设置密码</span></div>
+            <div class="password-wrapper">
+              <input type="password" id="regPassword" class="input-field" placeholder="至少4位字符">
+              <button type="button" class="toggle-password" data-target="regPassword" aria-label="显示/隐藏密码">
+                <i class="far fa-eye-slash"></i>
+              </button>
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-label"><i class="fas fa-check-circle"></i><span>确认密码</span></div>
+            <div class="password-wrapper">
+              <input type="password" id="regConfirmPwd" class="input-field" placeholder="再次输入密码">
+              <button type="button" class="toggle-password" data-target="regConfirmPwd" aria-label="显示/隐藏密码">
+                <i class="far fa-eye-slash"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="register-btn" id="registerSubmitBtn"><span>免费注册</span> <i
+              class="fas fa-user-plus"></i></button>
+        </form>
+        <div class="divider"><span>社交账号快捷注册</span></div>
+        <div class="social-login">
+          <div class="social-icon" id="wechatRegBtn"><i class="fab fa-weixin"></i></div>
+          <div class="social-icon" id="qqRegBtn"><i class="fab fa-qq"></i></div>
+        </div>
+        <div class="login-prompt">已有账号？<a class="login-link" id="gotoLoginBtn">返回登录</a><span style="margin-left:6px;">✨
+            永久免费</span></div>
+        <div class="free-badge"><i class="fas fa-gem"></i> 注册即享无限衣橱空间</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 授权模拟弹窗（微信/QQ 通用授权同意界面） -->
+  <div id="authModal" class="modal-overlay">
+    <div class="auth-modal">
+      <div class="modal-header">
+        <i id="modalIcon" class="fab fa-weixin"></i>
+        <h3 id="modalTitle">微信授权</h3>
+      </div>
+      <div class="modal-body">
+        <p id="modalDesc">“我的衣橱” 想要获取</p>
+        <div class="permission-list">
+          <div><i class="fas fa-user-circle"></i> 你的公开信息（昵称、头像）</div>
+          <div><i class="fas fa-address-card"></i> 衣橱账号绑定权限</div>
+          <div><i class="fas fa-calendar-alt"></i> 用于快捷登录管理穿搭</div>
+        </div>
+        <div class="modal-buttons">
+          <button class="btn-deny" id="denyAuthBtn">拒绝</button>
+          <button class="btn-allow" id="allowAuthBtn">同意授权</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"><i class="fas fa-spinner"></i> 正在跳转至衣橱主页...</div>
+  </div>
+  <div id="toastMsg" class="toast-msg"></div>
+
+  <script>
+    (function () {
+      // ---------- 密码显示切换功能 (为所有带 .toggle-password 的按钮绑定) ----------
+      function initPasswordToggles() {
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        toggleButtons.forEach(btn => {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            if (passwordInput) {
+              const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+              passwordInput.setAttribute('type', type);
+              // 切换眼睛图标样式
+              const icon = this.querySelector('i');
+              if (icon) {
+                if (type === 'text') {
+                  icon.classList.remove('fa-eye-slash');
+                  icon.classList.add('fa-eye');
+                } else {
+                  icon.classList.remove('fa-eye');
+                  icon.classList.add('fa-eye-slash');
+                }
+              }
+            }
+          });
+        });
+      }
+
+      // ---------- 用户数据存储 (模拟真实注册数据) ----------
+      let usersDB = [];
+      try {
+        const stored = localStorage.getItem('mywardrobe_users');
+        if (stored) {
+          usersDB = JSON.parse(stored);
+        } else {
+          usersDB.push({ username: "衣橱体验官", email: "wardrobe@free.com", phone: "", password: "free123" });
+          usersDB.push({ username: "时尚达人", email: "style@mywardrobe.com", phone: "", password: "style123" });
+          localStorage.setItem('mywardrobe_users', JSON.stringify(usersDB));
+        }
+      } catch (e) { console.warn(e); }
+
+      function saveUsersToLocal() {
+        localStorage.setItem('mywardrobe_users', JSON.stringify(usersDB));
+      }
+
+      function findUserByAccount(account) {
+        if (!account) return null;
+        const lowerAccount = account.trim().toLowerCase();
+        return usersDB.find(u => u.email.toLowerCase() === lowerAccount || (u.phone && u.phone === lowerAccount));
+      }
+
+      function registerNewUser(username, account, password) {
+        if (findUserByAccount(account)) return { success: false, msg: "该邮箱/手机号已被注册，请直接登录" };
+        const isEmail = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(account);
+        const newUser = {
+          username: username.trim(),
+          email: isEmail ? account : '',
+          phone: !isEmail ? account : '',
+          password: password
+        };
+        usersDB.push(newUser);
+        saveUsersToLocal();
+        return { success: true, msg: "注册成功！" };
+      }
+
+      function verifyLogin(account, password) {
+        const user = findUserByAccount(account);
+        if (!user) return { success: false, msg: "账号不存在，请先注册" };
+        if (user.password !== password) return { success: false, msg: "密码错误，请重新输入" };
+        return { success: true, msg: "登录成功", user };
+      }
+
+      // DOM 元素
+      const loginPage = document.getElementById('loginPage');
+      const registerPage = document.getElementById('registerPage');
+      const gotoRegister = document.getElementById('gotoRegisterBtn');
+      const gotoLogin = document.getElementById('gotoLoginBtn');
+      const authModal = document.getElementById('authModal');
+      const modalIcon = document.getElementById('modalIcon');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDesc = document.getElementById('modalDesc');
+      const denyBtn = document.getElementById('denyAuthBtn');
+      const allowBtn = document.getElementById('allowAuthBtn');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const toastMsgDiv = document.getElementById('toastMsg');
+
+      let pendingSocialCallback = null;
+
+      function showMessage(text, isError = false) {
+        const toast = toastMsgDiv;
+        toast.textContent = text;
+        toast.classList.add('show');
+        toast.style.background = isError ? "rgba(170,90,70,0.94)" : "rgba(43,36,31,0.94)";
+        setTimeout(() => toast.classList.remove('show'), 2500);
+      }
+
+      function showRegisterPage() {
+        loginPage.classList.add('page-hidden');
+        loginPage.classList.remove('page-visible');
+        registerPage.classList.add('page-visible');
+        registerPage.classList.remove('page-hidden');
+        window.history.pushState({ page: 'register' }, '注册', '#register');
+      }
+      function showLoginPage() {
+        registerPage.classList.add('page-hidden');
+        registerPage.classList.remove('page-visible');
+        loginPage.classList.add('page-visible');
+        loginPage.classList.remove('page-hidden');
+        window.history.pushState({ page: 'login' }, '登录', '#login');
+      }
+      if (gotoRegister) gotoRegister.addEventListener('click', (e) => { e.preventDefault(); showRegisterPage(); });
+      if (gotoLogin) gotoLogin.addEventListener('click', (e) => { e.preventDefault(); showLoginPage(); });
+
+      // 智能键盘模式
+      function isPhoneNumber(v) { return /^1[3-9]\d{9}$/.test(v.trim().replace(/\s/g, '')); }
+      function adjustInputMode(el) {
+        if (!el) return;
+        let val = el.value;
+        if (isPhoneNumber(val) || /^\d{5,}$/.test(val.trim().replace(/\s/g, ''))) el.setAttribute('inputmode', 'numeric');
+        else el.setAttribute('inputmode', 'email');
+        if (!val.trim()) el.setAttribute('inputmode', 'email');
+      }
+      const loginEmail = document.getElementById('loginEmail');
+      const regEmail = document.getElementById('regEmail');
+      [loginEmail, regEmail].forEach(inp => {
+        if (inp) { inp.addEventListener('input', () => adjustInputMode(inp)); inp.addEventListener('focus', () => adjustInputMode(inp)); adjustInputMode(inp); }
+      });
+
+      // 授权弹窗
+      function openAuthModal(platform, callback) {
+        if (platform === 'wechat') {
+          modalIcon.className = 'fab fa-weixin';
+          modalTitle.innerText = '微信授权';
+          modalDesc.innerText = '“我的衣橱” 申请使用微信登录，需要你授权同意';
+        } else {
+          modalIcon.className = 'fab fa-qq';
+          modalTitle.innerText = 'QQ授权';
+          modalDesc.innerText = '“我的衣橱” 申请使用QQ登录，需要你授权同意';
+        }
+        pendingSocialCallback = callback;
+        authModal.classList.add('active');
+      }
+      function closeModal() { authModal.classList.remove('active'); pendingSocialCallback = null; }
+      denyBtn.addEventListener('click', () => { closeModal(); showMessage("已拒绝授权，无法使用微信/QQ登录", true); });
+      allowBtn.addEventListener('click', () => {
+        const callback = pendingSocialCallback;
+        closeModal();
+        if (callback && typeof callback === 'function') callback();
+        else redirectToWardrobeHome();
+      });
+
+      function redirectToWardrobeHome() {
+        loadingOverlay.classList.add('active');
+        setTimeout(() => {
+          loadingOverlay.classList.remove('active');
+          showMessage("✨ 登录成功，欢迎来到我的衣橱", false);
+          setTimeout(() => {
+            alert("登录成功！\n即将进入「我的衣橱」时尚主页。\n(演示环境，实际可跳转至真实衣橱界面)");
+          }, 100);
+        }, 1500);
+      }
+
+      function socialLoginWithAuth(platform, isRegisterContext = false) {
+        openAuthModal(platform, () => {
+          const socialAccount = `${platform}_user_${Date.now()}`;
+          let socialUser = usersDB.find(u => u.email === socialAccount || u.phone === socialAccount);
+          if (!socialUser) {
+            const newSocialUser = {
+              username: `${platform === 'wechat' ? '微信用户' : 'QQ用户'}_${Math.floor(Math.random() * 1000)}`,
+              email: platform === 'wechat' ? `wechat_${Date.now()}@wx.auth` : '',
+              phone: platform === 'qq' ? `qq_${Date.now()}` : '',
+              password: 'social_auth_dummy',
+              isSocial: true
+            };
+            usersDB.push(newSocialUser);
+            saveUsersToLocal();
+          }
+          showMessage(`${platform === 'wechat' ? '微信' : 'QQ'}授权成功，正在登录...`, false);
+          setTimeout(() => { redirectToWardrobeHome(); }, 400);
+        });
+      }
+
+      const wechatLogin = document.getElementById('wechatLoginBtn');
+      const qqLogin = document.getElementById('qqLoginBtn');
+      if (wechatLogin) wechatLogin.addEventListener('click', (e) => { e.preventDefault(); socialLoginWithAuth('wechat', false); });
+      if (qqLogin) qqLogin.addEventListener('click', (e) => { e.preventDefault(); socialLoginWithAuth('qq', false); });
+      const wechatReg = document.getElementById('wechatRegBtn');
+      const qqReg = document.getElementById('qqRegBtn');
+      if (wechatReg) wechatReg.addEventListener('click', (e) => { e.preventDefault(); socialLoginWithAuth('wechat', true); });
+      if (qqReg) qqReg.addEventListener('click', (e) => { e.preventDefault(); socialLoginWithAuth('qq', true); });
+
+      // 普通登录
+      const loginForm = document.getElementById('loginForm');
+      const loginPwd = document.getElementById('loginPassword');
+      const rememberCheck = document.getElementById('rememberCheck');
+      function validateEmailOrPhone(v) { return /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(v) || /^1[3-9]\d{9}$/.test(v); }
+      function loadSavedEmail() { let s = localStorage.getItem('mywardrobe_login_email'); if (s) { loginEmail.value = s; adjustInputMode(loginEmail); if (rememberCheck) rememberCheck.checked = true; } }
+      function saveEmailIfNeeded(e) { if (rememberCheck.checked) localStorage.setItem('mywardrobe_login_email', e); else localStorage.removeItem('mywardrobe_login_email'); }
+      async function handleLogin(e) {
+        e.preventDefault();
+        let account = loginEmail.value.trim();
+        let pwd = loginPwd.value;
+        const btn = document.getElementById('loginButton');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 登录中...'; btn.disabled = true;
+        if (!validateEmailOrPhone(account)) {
+          showMessage("请输入有效的邮箱或11位手机号", true);
+          btn.innerHTML = orig; btn.disabled = false;
+          return;
+        }
+        const result = verifyLogin(account, pwd);
+        if (result.success) {
+          saveEmailIfNeeded(account);
+          showMessage("登录成功，即将跳转衣橱", false);
+          setTimeout(() => { redirectToWardrobeHome(); btn.innerHTML = orig; btn.disabled = false; }, 800);
+        } else {
+          showMessage(result.msg, true);
+          btn.innerHTML = orig; btn.disabled = false;
+        }
+      }
+      loginForm.addEventListener('submit', handleLogin);
+      loadSavedEmail();
+      document.getElementById('forgotPwdLink')?.addEventListener('click', (e) => { e.preventDefault(); showMessage("密码重置指引已发送（免费衣橱演示）", false); });
+
+      // 注册
+      const regForm = document.getElementById('registerForm');
+      const regUsername = document.getElementById('regUsername');
+      const regPassword = document.getElementById('regPassword');
+      const regConfirm = document.getElementById('regConfirmPwd');
+      async function handleRegister(e) {
+        e.preventDefault();
+        const username = regUsername.value.trim();
+        const account = regEmail.value.trim();
+        const pwd = regPassword.value;
+        const confirm = regConfirm.value;
+        const btn = document.getElementById('registerSubmitBtn');
+        const orig = btn.innerHTML;
+        if (!username) { showMessage("请填写用户名", true); return; }
+        if (!validateEmailOrPhone(account)) { showMessage("请输入有效邮箱或手机号", true); return; }
+        if (!pwd || pwd.length < 4) { showMessage("密码至少4位", true); return; }
+        if (pwd !== confirm) { showMessage("两次密码不一致", true); return; }
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 注册中...'; btn.disabled = true;
+        const regResult = registerNewUser(username, account, pwd);
+        if (regResult.success) {
+          showMessage(regResult.msg, false);
+          setTimeout(() => {
+            showLoginPage();
+            loginEmail.value = account;
+            adjustInputMode(loginEmail);
+            showMessage("注册成功，请登录", false);
+          }, 1200);
+        } else {
+          showMessage(regResult.msg, true);
+        }
+        btn.innerHTML = orig; btn.disabled = false;
+      }
+      regForm.addEventListener('submit', handleRegister);
+
+      window.addEventListener('popstate', () => { if (window.location.hash === '#register') showRegisterPage(); else showLoginPage(); });
+      if (window.location.hash === '#register') showRegisterPage();
+      else showLoginPage();
+
+      // 初始化密码小眼睛
+      initPasswordToggles();
+    })();
+  </script>
+</body>
+
+</html>
